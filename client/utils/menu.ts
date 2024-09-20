@@ -4,12 +4,8 @@ export const menuOptions = [
     href: "/",
   },
   {
-    label: "Claim",
-    href: "/get-points",
-  },
-  {
-    label: "Leaderboard",
-    href: "/leaderboard",
+    label: "Polls",
+    href: "/polls",
   },
   {
     label: "Profile",
