@@ -1,16 +1,38 @@
 import * as React from "react";
 import axios from 'axios';
+import { getQuizFromPoll, addNillionIdToPoll } from "@/database/dbApi";
+import { add } from "date-fns";
 
-const initialWeights = [
-    { option0_weights: [0, 2, 0, 1, 0], option1_weights: [0, 0, 2, 0, 0] },
-    { option0_weights: [2, 0, 1, 1, 0], option1_weights: [0, 2, 1, 0, 0] },
-    { option0_weights: [0, 2, 0, 1, 0], option1_weights: [2, 0, 0, 1, 0] },
-    { option0_weights: [0, 2, 0, 1, 0], option1_weights: [2, 0, 0, 1, 0] },
-    { option0_weights: [0, 2, 0, 1, 0], option1_weights: [2, 0, 0, 1, 0] },
-    { option0_weights: [0, 2, 0, 1, 0], option1_weights: [2, 0, 0, 1, 0] }
-];
+interface Quiz {
+    main_question: string;
+    main_options: string[];
+    support_questions: {
+        question: string;
+        options: string[];
+        weights: {
+            option_0_weights: number[];
+            option_1_weights: number[];
+        };
+    }[];
+}
 
-export default function TestNillionPage() {
+export default function TestNillionPage(pollId: string) {
+    const [quiz, setQuiz] = React.useState<Quiz | null>(null);
+    React.useEffect(() => {
+        const fetchQuiz = async () => {
+            const quiz = await getQuizFromPoll(pollId);
+            setQuiz(quiz);
+        };
+        fetchQuiz();
+    }, []);
+
+    const initialWeights = React.useMemo(() => {
+        if (!quiz) return [];
+        return quiz.support_questions.map((question) => ({
+            option0_weights: new Array(question.options.length).fill(0),
+            option1_weights: new Array(question.options.length).fill(0),
+        }));
+    }, [quiz]);
 
     const [storeId, setStoreId] = React.useState<string | null>(null);
     const [weights, setWeights] = React.useState(initialWeights);
@@ -57,7 +79,9 @@ export default function TestNillionPage() {
               'Content-Type': 'application/json',
             }
           });
-    
+          
+          // no fail check here because sugou
+          addNillionIdToPoll(pollId, response.data.store_id); //this should be it
           setStoreId(response.data.store_id);
           console.log('Stored values response:', response.data);
         } catch (error) {
