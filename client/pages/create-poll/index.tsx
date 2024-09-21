@@ -73,13 +73,13 @@ export default function CreateElectionPoll() {
 
       const metadata = imageUrl;
 
-      const tx = await createPoll(
-        data.title,
-        ['1', '2'], // have no idea what this is
-        metadata,
-        BigInt(durationInSeconds),
-        data.isQuadraticVoting ? 1 : 0
-      );
+      const tx = await createPoll({
+        name: data.title,
+        options: ['1', '2'],
+        metadata: metadata,
+        duration: BigInt(durationInSeconds),
+        isQv: data.isQuadraticVoting ? 1 : 0
+    });
 
       // Wait for transaction receipt and handle the rest of the process
       const transactionReceipt = await publicClient.waitForTransactionReceipt({ hash: tx });
@@ -375,3 +375,4 @@ export default function CreateElectionPoll() {
     </div>
   );
 }
+>>>>>>> main
