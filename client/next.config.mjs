@@ -9,7 +9,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ["i.scdn.co"],
+    domains: ["i.scdn.co", "teal-magic-alligator-248.mypinata.cloud"],
   },
 };
 
