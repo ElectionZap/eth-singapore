@@ -1,12 +1,18 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter } from 'next/router'
 import { useWallet } from "@/contexts/Wallet"
+import { Loader2 } from "lucide-react"
+import axios from 'axios';
+
+interface SelectedAnswers {
+  [key: string]: number; 
+}
 
 interface Question {
   id: number
@@ -29,20 +35,43 @@ const mockQuestions: Question[] = [
     id: 3,
     text: "Who painted the Mona Lisa?",
     options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo", "Rembrandt"]
+  },
+  {
+    id: 4,
+    text: "What is the capital of France?",
+    options: ["London", "Berlin", "Paris", "Madrid", "Rome"]
+  },
+  {
+    id: 5,
+    text: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Jupiter", "Saturn", "Mercury"]
+  },
+  {
+    id: 6,
+    text: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Jupiter", "Saturn", "Mercury"]
   }
 ]
 
 export default function QuizPage() {
   const router = useRouter() 
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({})
+  const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0)
+  const [selectedAnswers, setSelectedAnswers] = React.useState<SelectedAnswers>({
+    q1_answer: -1,
+    q2_answer: -1,
+    q3_answer: -1,
+    q4_answer: -1,
+    q5_answer: -1,
+    q6_answer: -1
+  })
+  const [loading, setLoading] = React.useState(false)
   const { id } = router.query
   const { account } = useWallet()
 
   const currentQuestion = mockQuestions[currentQuestionIndex]
 
   const handleAnswerSelect = (answer: string) => {
-    setSelectedAnswers(prev => ({ ...prev, [currentQuestion.id]: answer }))
+    setSelectedAnswers(prev => ({ ...prev, [`q${currentQuestion.id}_answer`]: Number(answer) }))
   }
 
   const goToPreviousQuestion = () => {
@@ -57,14 +86,38 @@ export default function QuizPage() {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("Submitted answers: ", selectedAnswers)
 
-    // Push to the result route with dynamic parameters
-    router.push(`/result/${id}/${account}`)
+    setLoading(true)
+
+    const storeId = "707dae54-2d6d-4a15-a9db-4448df1d32bc"; // Replace with the actual store ID
+    try {
+      if (!storeId) {
+        alert("Please store values first!");
+        return;
+      }
+
+      const response = await axios.post('/api/compute', {
+        store_id: storeId,
+        ...selectedAnswers
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('Computation result:', response.data.result);
+      router.push(`/result/${id}/${response.data.result.final_choice}/${account}`)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error computing values:', error);
+      setLoading(false)
+    }
   }
 
-  const isAnswerSelected = !!selectedAnswers[currentQuestion.id] // Check if the user selected an answer for the current question
+  const key = `q${currentQuestion.id}_answer`; // Generate the dynamic key
+  const isAnswerSelected = selectedAnswers[key] > -1; // Use the dynamic key to check
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -87,11 +140,11 @@ export default function QuizPage() {
                   <motion.button
                     key={index}
                     className={`w-full p-4 text-left rounded-lg transition-colors ${
-                      selectedAnswers[currentQuestion.id] === option
+                      selectedAnswers[`q${currentQuestion.id}_answer`] === index
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-secondary hover:bg-secondary/80'
                     }`}
-                    onClick={() => handleAnswerSelect(option)}
+                    onClick={() => handleAnswerSelect(index.toString())}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -111,12 +164,28 @@ export default function QuizPage() {
             <ChevronLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
           {currentQuestionIndex === mockQuestions.length - 1 ? (
-            <Button onClick={handleSubmit} disabled={!isAnswerSelected}>
-              Submit
+            
+            <Button onClick={handleSubmit} disabled={!isAnswerSelected || loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <p>Please wait</p>
+                </>
+              ) : <p>Submit</p>}
             </Button>
           ) : (
             <Button onClick={goToNextQuestion} disabled={!isAnswerSelected}>
-              Next <ChevronRight className="ml-2 h-4 w-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <p>Please wait</p>
+                </>
+              ) : (
+                <>
+                  <p>Next</p>
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           )}
         </CardFooter>

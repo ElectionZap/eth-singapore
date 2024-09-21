@@ -53,15 +53,14 @@ const RankDisplay = ({ rank }: { rank: number }) => {
 
 export default function ResultPage() {
     const router = useRouter() 
-    const { account } = router.query
+    const { account, result } = router.query
     const [isLoading, setIsLoading] = useState(true)
-    const [result, setResult] = useState<string | null>(null)
     const [isVoting, setIsVoting] = useState(false)
     const [voteResult, setVoteResult] = useState<{ option: string; percentage: number; rank: number } | null>(null)
 
     useEffect(() => {
         fetchResult().then((data) => {
-        setResult(data)
+        // setResult(data)
         setIsLoading(false)
         confetti({
             particleCount: 100,
