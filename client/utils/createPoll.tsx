@@ -1,11 +1,20 @@
 import { walletClient } from './client'
 import { MACIWrapper } from '../contracts/MACIWrapper';
 export default async function createPoll(
-    name: string, 
-    options: string[],
-    metadata: string,
-    duration: bigint,
-    isQv: number,
+    {
+    name, 
+    options,
+    metadata,
+    duration,
+    isQv,
+    }:
+    {
+        name: string, 
+        options: string[],
+        metadata: string,
+        duration: bigint,
+        isQv: number,
+        }
 ) {
     if (!Array.isArray(options) || !name || !metadata || !duration || isQv === undefined) {
         throw new Error("Invalid arguments passed to createPoll.");

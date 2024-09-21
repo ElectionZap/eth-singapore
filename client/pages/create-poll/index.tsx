@@ -57,7 +57,7 @@ export default function CreateElectionPoll() {
   //     }
   // }, []);
     // const tx = await createPoll(data.name, data.options, `1`, BigInt(3600), 1);
-    const tx = await createPoll(data.name, [`1`, `2`], `1`, BigInt(3600), 1);
+    const tx = await createPoll({name: data.name, options: [`1`, `2`], metadata: `0`, duration: BigInt(3600), isQv: 1});
     try {
         const transactionReceipt = await publicClient.waitForTransactionReceipt({ hash: tx });
 
