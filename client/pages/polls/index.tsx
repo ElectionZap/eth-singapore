@@ -1,70 +1,58 @@
-import ElectionCard from "@/components/Polls/ElectionCard"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import ElectionCard from "@/components/Polls/ElectionCard";
+import Link from "next/link";
+import { fetchAllPolls } from "@/database/dbApi";
 
 export interface Poll {
-  id: number
-  image: string
-  title: string
-  author: string
+  id: number;
+  image: string;
+  title: string;
+  author: string;
   options: {
-    label: string
-    percentage: number
-  }[]
-  deadline: string
+    label: string;
+    percentage: number;
+  }[];
+  deadline: string;
 }
 
-const polls: Poll[] = [
-  {
-    id: 1,
-    image: "/placeholder.jpg",
-    title: "2024 Presidential Election",
-    author: "John Doe",
-    options: [
-      { label: "Candidate A", percentage: 45 },
-      { label: "Candidate B", percentage: 40 },
-      { label: "Others", percentage: 15 },
-    ],
-    deadline: "2024-11-03",
-  },
-  {
-    id: 2,
-    image: "/placeholder.jpg",
-    title: "Local Mayor Race",
-    author: "Jane Smith",
-    options: [
-      { label: "Candidate X", percentage: 35 },
-      { label: "Candidate Y", percentage: 38 },
-      { label: "Others", percentage: 27 },
-    ],
-    deadline: "2023-10-15",
-  },
-  {
-    id: 3,
-    image: "/placeholder.jpg",
-    title: "State Governor Election",
-    author: "Bob Johnson",
-    options: [
-      { label: "Candidate M", percentage: 50 },
-      { label: "Candidate N", percentage: 42 },
-      { label: "Others", percentage: 8 },
-    ],
-    deadline: "2024-06-20",
-  },
-  {
-    id: 4,
-    image: "/placeholder.jpg",
-    title: "2024 Presidential Election",
-    author: "John Doe",
-    options: [
-      { label: "Candidate A", percentage: 45 },
-      { label: "Candidate B", percentage: 40 },
-      { label: "Others", percentage: 15 },
-    ],
-    deadline: "2024-11-03",
-  },
-]
+export default function PollsComponent() {
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-export default function Component() {
+  useEffect(() => {
+    // Fetch polls data when component mounts
+    const getPolls = async () => {
+      try {
+        const pollData = await fetchAllPolls();
+
+        // Transform the poll data to match the Poll interface
+        const formattedPolls: Poll[] = pollData.map((poll: any) => ({
+          id: poll.poll_id, // map poll_id to id
+          image: "/placeholder.jpg", // placeholder image for now
+          title: poll.title, // title remains the same
+          author: poll.creator, // creator (might be an address)
+          options: JSON.parse(poll.voting_options).map((option: any) => ({
+            label: option.option,
+            percentage: 0, // assuming we don't have percentage info in the data
+          })),
+          deadline: poll.end_date, // map end_date to deadline
+        }));
+
+        setPolls(formattedPolls);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching polls:", error);
+        setLoading(false);
+      }
+    };
+
+    getPolls();
+  }, []);
+
+  // Handle loading state
+  if (loading) {
+    return <div>Loading polls...</div>;
+  }
 
   return (
     <div className="container mx-auto p-4 pt-12">
@@ -72,10 +60,10 @@ export default function Component() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {polls.map((poll) => (
           <Link key={poll.id} href={`/polls/${poll.id}`}>
-          <ElectionCard poll={poll}/>
+            <ElectionCard poll={poll} />
           </Link>
         ))}
       </div>
     </div>
-  )
+  );
 }
