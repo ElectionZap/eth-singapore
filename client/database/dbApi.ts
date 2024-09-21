@@ -22,7 +22,7 @@ export const fetchPollsByStatus = async (status: string) => {
   return polls;
 };
 
-export const createPoll = async (poll: any) => {
+export const createDbPoll = async (poll: any) => {
   const response = await fetch(`${BACKEND_URL}/api/create-poll`, {
     method: "POST",
     headers: {

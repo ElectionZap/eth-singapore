@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,13 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { createPoll } from "@/database/dbApi"; // Ensure this is correctly imported
+import { createDbPoll } from "@/database/dbApi"; // Ensure this is correctly imported
+import createPoll from "@/utils/createPoll"
+import { fetchPoll } from "@/utils/fetchPoll"
+import { publicClient } from "@/utils/client"
+// import { getPollCreationEvent } from "@/utils/getPollCreationEvent"
+import { MACIWrapper } from "@/contracts/MACIWrapper"
+import { hexToNumber } from "viem"
 
 interface FormData {
   title: string;
@@ -51,39 +57,63 @@ export default function CreateElectionPoll() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
 
-    console.log(data);
-
     try {
-      // Format the data to match the Poll type
-      const formattedPoll = {
-        title: data.title,
-        description: data.description,
-        isQuadraticVoting: data.isQuadraticVoting,
-        creator: "0x3", // Replace with the creator wallet
-        startDate: data.startDate.toISOString(),
-        endDate: data.endDate.toISOString(),
-        votingOptions: data.options.map((option, index) => ({
-          id: index + 1, // IDs are sequential
-          option: option.value,
-        })),
-        status: "ongoing", // Default status
-        results: "", // Placeholder for results
-        questionaire: "", // Placeholder for questionaire
-        userIDs: [], // Placeholder for userIDs
-      };
+      const durationInSeconds = Math.floor(
+        (data.endDate.getTime() - data.startDate.getTime()) / 1000
+      );
 
-      console.log(formattedPoll);
+      const votingOptions = data.options.map((option, index) => String(index + 1));
 
-      // Call the createPoll API function
-      await createPoll(formattedPoll);
+      const metadata = "1";
 
-      toast({
-        title: "Poll Created!",
-        description: "Your election poll has been successfully created.",
-        duration: 5000,
-      });
-      setIsSubmitted(true);
-      reset();
+      const tx = await createPoll(
+        data.title,
+        ['1','2'], // have no idea what this is
+        metadata,
+        BigInt(durationInSeconds), 
+        data.isQuadraticVoting ? 1 : 0
+      );
+
+      // Wait for transaction receipt and handle the rest of the process
+      const transactionReceipt = await publicClient.waitForTransactionReceipt({ hash: tx });
+
+      if (transactionReceipt?.status === 'success') {
+        const pollId = hexToNumber(transactionReceipt.logs[7].topics[1]!);
+        console.log(`Poll created on-chain with ID: ${pollId}`);
+
+        // Proceed with creating the poll in the database
+        await createDbPoll({
+          title: data.title,
+          description: data.description,
+          isQuadraticVoting: data.isQuadraticVoting,
+          creator: "0x3", // Replace with actual creator wallet
+          startDate: data.startDate.toISOString(),
+          endDate: data.endDate.toISOString(),
+          votingOptions: data.options.map((option, index) => ({
+            id: index + 1,
+            option: option.value,
+          })),
+          status: "ongoing", // Default status
+          results: "", // Placeholder for results
+          questionaire: "", // Placeholder for questionaire
+          userIDs: [], // Placeholder for userIDs
+        });
+
+        toast({
+          title: "Poll Created!",
+          description: "Your election poll has been successfully created.",
+          duration: 5000,
+        });
+        setIsSubmitted(true);
+        reset();
+      } else {
+        console.log('Transaction failed or reverted.');
+        toast({
+          title: "Error",
+          description: "There was an issue creating the poll on-chain. Please try again.",
+          duration: 5000,
+        });
+      }
     } catch (error) {
       console.error("Failed to create poll:", error);
       toast({
