@@ -12,6 +12,9 @@ import { signUp } from '@/utils/signUp'
 import { publicClient } from "@/utils/client"
 import { publishMessage } from "@/utils/publishMessage"
 import { fetchPoll } from "@/utils/fetchPoll"
+import { generateKeyPair } from "crypto"
+import { generateKeypair } from "@/utils/generateKeypair"
+import { Message } from "maci-domainobjs"
 
 const FreeForAllGatekeeper = '0x4C7a83ccD9177d3A2C800D614461e48B3aA4C471'
 const ConstantInitialVoiceCreditProxy = '0x41293862e60d17623fc760C3FD97bC36293Ad7ED'
@@ -25,7 +28,8 @@ const fetchResult = () => {
 }
 
 const submitVote = async (result: string) => {
-    const sign = await signUp({x:BigInt(1), y: BigInt(2)}, FreeForAllGatekeeper, ConstantInitialVoiceCreditProxy)
+  const userKP = await generateKeypair();
+    const sign = await signUp({x:BigInt(userKP!.pubKey.asContractParam().x), y:BigInt(userKP!.pubKey.asContractParam().y)}, FreeForAllGatekeeper, ConstantInitialVoiceCreditProxy)
       try {
         const signReceipt = await publicClient.waitForTransactionReceipt({ hash: sign });
 
@@ -37,8 +41,9 @@ const submitVote = async (result: string) => {
 
         if (signReceipt?.status === 'success') {
         const pollId = 7;
-        const data = fetchPoll(BigInt(pollId))
-        const msg = await publishMessage(result!, {x:BigInt(1), y:BigInt(2)}, (await data).pollContracts.poll)
+        const data = await fetchPoll(BigInt(pollId))
+        console.log(data.pollContracts.poll)
+        const msg = await publishMessage([BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(1), BigInt(0)], {x:BigInt(userKP!.pubKey.asContractParam().x), y:BigInt(userKP!.pubKey.asContractParam().y)}, data.pollContracts.poll)
         const msgReceipt = await publicClient.waitForTransactionReceipt({ hash: msg });
 
         console.log(msgReceipt);
@@ -52,7 +57,7 @@ const submitVote = async (result: string) => {
   return new Promise<{ option: string; percentage: number; rank: number }>((resolve) => {
     setTimeout(() => {
       resolve({ option: "Option 2", percentage: 32, rank: 2 })
-    }, 2000) // 2 seconds delay
+    }, 200000) // 2 seconds delay
   })
 }
 
