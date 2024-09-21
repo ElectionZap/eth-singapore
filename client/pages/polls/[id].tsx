@@ -93,6 +93,7 @@ export default function ElectionDetails() {
           alt={pollData.title}
           width={800}
           height={300}
+          priority
           className="w-full h-48 object-cover rounded-lg shadow-md mb-8"
         />
         <div className="grid md:grid-cols-2 gap-8">
@@ -115,9 +116,12 @@ export default function ElectionDetails() {
               </div>
               {signer ? (
                 <Link href={`/quiz/${id}`}>
-                  <Button className="w-full mt-auto" size="lg">
+                    <Button
+                    className="w-full mt-auto transition-transform transform hover:scale-105 hover:bg-gray-300"
+                    size="lg"
+                    >
                     Start Recommendation
-                  </Button>
+                    </Button>
                 </Link>
               ) : (
                 <Button className="w-full mt-auto" size="lg" disabled>

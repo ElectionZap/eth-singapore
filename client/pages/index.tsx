@@ -9,15 +9,22 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white -mt-20">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-blue-900 to-blue-950 py-48">
+      <section className="bg-gradient-to-b from-blue-900 to-blue-950 py-48 relative">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-50"
+          style={{ backgroundImage: "url('/heroBg.png')" }}
+        />
+
+        {/* Content */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="container mx-auto px-4 text-center"
+          className="relative container mx-auto px-4 text-center"
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-4">
-            Election<span className="text-blue-300 text-6xl">.xyz</span>
+            Poly.VOTE<span className="text-blue-300 text-6xl"></span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-200">Your election recommendation</p>
           <Link href="/polls">
@@ -27,6 +34,7 @@ export default function HomePage() {
           </Link>
         </motion.div>
       </section>
+
 
       {/* Aspects Section */}
       <section className="py-24 bg-transparent">
