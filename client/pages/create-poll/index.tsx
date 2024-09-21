@@ -1,73 +1,117 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useForm, useFieldArray } from "react-hook-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Loader2, Plus, Trash2 } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useForm, useFieldArray } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Loader2, Plus, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { createPoll } from "@/database/dbApi"; // Ensure this is correctly imported
 
 interface FormData {
-  name: string
-  description: string
-  options: { value: string }[]
-  startDate: Date
-  endDate: Date
-  image: FileList
+  title: string;
+  description: string;
+  isQuadraticVoting: boolean;
+  startDate: Date;
+  endDate: Date;
+  options: { value: string }[];
 }
 
 export default function CreateElectionPoll() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const { toast } = useToast()
-  const { register, control, setValue, handleSubmit, formState: { errors }, watch, reset } = useForm<FormData>({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
+  const {
+    register,
+    control,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm<FormData>({
     defaultValues: {
-      options: [{ value: "" }, { value: "" }]
-    }
-  })
+      options: [{ value: "" }, { value: "" }],
+    },
+  });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "options"
-  })
+    name: "options",
+  });
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true)
-    // Simulating API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsSubmitting(false)
-    console.log(data)
-    toast({
-      title: "Poll Created!",
-      description: "Your election poll has been successfully created.",
-      duration: 5000,
-    })
-    setIsSubmitted(true)
-    reset()
-  }
+    setIsSubmitting(true);
 
-  const watchOptions = watch("options")
+    console.log(data);
+
+    try {
+      // Format the data to match the Poll type
+      const formattedPoll = {
+        title: data.title,
+        description: data.description,
+        isQuadraticVoting: data.isQuadraticVoting,
+        creator: "0x3", // Replace with the creator wallet
+        startDate: data.startDate.toISOString(),
+        endDate: data.endDate.toISOString(),
+        votingOptions: data.options.map((option, index) => ({
+          id: index + 1, // IDs are sequential
+          option: option.value,
+        })),
+        status: "ongoing", // Default status
+        results: "", // Placeholder for results
+        questionaire: "", // Placeholder for questionaire
+        userIDs: [], // Placeholder for userIDs
+      };
+
+      console.log(formattedPoll);
+
+      // Call the createPoll API function
+      await createPoll(formattedPoll);
+
+      toast({
+        title: "Poll Created!",
+        description: "Your election poll has been successfully created.",
+        duration: 5000,
+      });
+      setIsSubmitted(true);
+      reset();
+    } catch (error) {
+      console.error("Failed to create poll:", error);
+      toast({
+        title: "Error",
+        description: "There was an issue creating the poll. Please try again.",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const watchOptions = watch("options");
 
   const handleCreateOther = () => {
-    setIsSubmitted(false)
+    setIsSubmitted(false);
     reset({
-      options: [{ value: "" }, { value: "" }]
-    })
-  }
+      options: [{ value: "" }, { value: "" }],
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 pt-12 pb-24">
       <Card className="max-w-2xl mx-auto bg-black/30 backdrop-blur-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Create Election Poll</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Create Election Poll
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <AnimatePresence mode="wait">
@@ -81,15 +125,43 @@ export default function CreateElectionPoll() {
                 className="space-y-6"
               >
                 <div>
-                  <Label htmlFor="name">Poll Name</Label>
-                  <Input id="name" className="mt-2" {...register("name", { required: "Poll name is required" })} />
-                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+                  <Label htmlFor="title">Poll Title</Label>
+                  <Input
+                    id="title"
+                    className="mt-2"
+                    {...register("title", { required: "Poll title is required" })}
+                  />
+                  {errors.title && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.title.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" className="mt-2" {...register("description", { required: "Description is required" })} />
-                  {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
+                  <Textarea
+                    id="description"
+                    className="mt-2"
+                    {...register("description", {
+                      required: "Description is required",
+                    })}
+                  />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="isQuadraticVoting">Is Quadratic Voting</Label>
+                  <Input
+                    type="checkbox"
+                    id="isQuadraticVoting"
+                    className="mt-2"
+                    {...register("isQuadraticVoting")}
+                  />
                 </div>
 
                 <div>
@@ -104,11 +176,18 @@ export default function CreateElectionPoll() {
                       className="flex items-center space-x-2 mt-2"
                     >
                       <Input
-                        {...register(`options.${index}.value` as const, { required: "Option is required" })}
+                        {...register(`options.${index}.value` as const, {
+                          required: "Option is required",
+                        })}
                         placeholder={`Option ${index + 1}`}
                       />
                       {index > 1 && (
-                        <Button type="button" variant="outline" size="icon" onClick={() => remove(index)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => remove(index)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -140,7 +219,9 @@ export default function CreateElectionPoll() {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("startDate") ? format(watch("startDate"), "PPP") : <span>Pick a date</span>}
+                          {watch("startDate")
+                            ? format(watch("startDate"), "PPP")
+                            : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -165,7 +246,9 @@ export default function CreateElectionPoll() {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("endDate") ? format(watch("endDate"), "PPP") : <span>Pick a date</span>}
+                          {watch("endDate")
+                            ? format(watch("endDate"), "PPP")
+                            : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -180,10 +263,16 @@ export default function CreateElectionPoll() {
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <Label htmlFor="image">Upload Image</Label>
-                  <Input className="mt-2" id="image" type="file" accept="image/*" {...register("image")} />
-                </div>
+                  <Input
+                    className="mt-2"
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    {...register("image")}
+                  />
+                </div> */}
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? (
@@ -204,7 +293,9 @@ export default function CreateElectionPoll() {
                 exit={{ opacity: 0 }}
                 className="space-y-4"
               >
-                <p className="text-center text-lg">Your poll has been successfully created!</p>
+                <p className="text-center text-lg">
+                  Your poll has been successfully created!
+                </p>
                 <div className="flex justify-center space-x-4">
                   <Button onClick={handleCreateOther}>Create Other</Button>
                   <Link href="/polls">
@@ -217,5 +308,5 @@ export default function CreateElectionPoll() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
