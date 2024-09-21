@@ -7,8 +7,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from "next/link";
 import { menuOptions } from "@/utils/menu";
 import ConnectButton from "./ConnectButton";
+import { useWallet } from "@/contexts/Wallet";
 
 export default function Header() {
+  const { account } = useWallet();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
@@ -43,8 +45,8 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-4">
           {menuOptions.map((option, index) => (
-            <Link key={index} href={option.href}>
-              <Button variant="ghost" className="hover:bg-gray-400">
+            <Link key={index} href={option.label === "Profile" ? `/profile/${account}` : option.href}>
+              <Button variant="ghost" className="hover:bg-accent">
                 {option.label}
               </Button>
             </Link>

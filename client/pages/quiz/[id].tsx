@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useRouter } from 'next/router'
+import { useWallet } from "@/contexts/Wallet"
 
 interface Question {
   id: number
@@ -31,8 +33,11 @@ const mockQuestions: Question[] = [
 ]
 
 export default function QuizPage() {
+  const router = useRouter() 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({})
+  const { id } = router.query
+  const { account } = useWallet()
 
   const currentQuestion = mockQuestions[currentQuestionIndex]
 
@@ -52,11 +57,20 @@ export default function QuizPage() {
     }
   }
 
+  const handleSubmit = () => {
+    console.log("Submitted answers: ", selectedAnswers)
+
+    // Push to the result route with dynamic parameters
+    router.push(`/result/${id}/${account}`)
+  }
+
+  const isAnswerSelected = !!selectedAnswers[currentQuestion.id] // Check if the user selected an answer for the current question
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-2xl">
+    <div className="flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl bg-black/30 backdrop-blur-md border-0">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Quiz</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center mb-12">Quiz</CardTitle>
         </CardHeader>
         <CardContent>
           <AnimatePresence mode="wait">
@@ -96,12 +110,15 @@ export default function QuizPage() {
           >
             <ChevronLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
-          <Button
-            onClick={goToNextQuestion}
-            disabled={currentQuestionIndex === mockQuestions.length - 1}
-          >
-            Next <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
+          {currentQuestionIndex === mockQuestions.length - 1 ? (
+            <Button onClick={handleSubmit} disabled={!isAnswerSelected}>
+              Submit
+            </Button>
+          ) : (
+            <Button onClick={goToNextQuestion} disabled={!isAnswerSelected}>
+              Next <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

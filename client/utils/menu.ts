@@ -4,6 +4,10 @@ export const menuOptions = [
     href: "/",
   },
   {
+    label: "Create Poll",
+    href: "/create-poll",
+  },
+  {
     label: "Polls",
     href: "/polls",
   },
