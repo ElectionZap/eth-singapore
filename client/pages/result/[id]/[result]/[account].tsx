@@ -12,9 +12,8 @@ import { signUp } from '@/utils/signUp'
 import { publicClient } from "@/utils/client"
 import { publishMessage } from "@/utils/publishMessage"
 import { fetchPoll } from "@/utils/fetchPoll"
-import { generateKeyPair } from "crypto"
 import { generateKeypair } from "@/utils/generateKeypair"
-import { Message } from "maci-domainobjs"
+
 
 const FreeForAllGatekeeper = '0x4C7a83ccD9177d3A2C800D614461e48B3aA4C471'
 const ConstantInitialVoiceCreditProxy = '0x41293862e60d17623fc760C3FD97bC36293Ad7ED'
@@ -23,7 +22,7 @@ const fetchResult = () => {
   return new Promise<string>((resolve) => {
     setTimeout(() => {
       resolve("Candidate A")
-    }, 3000) // 3 seconds delay
+    }, 100) // delay
   })
 }
 
@@ -88,14 +87,13 @@ const RankDisplay = ({ rank }: { rank: number }) => {
 
 export default function ResultPage() {
     const router = useRouter() 
-    const { account } = router.query
+    const { account, result } = router.query
     const [isLoading, setIsLoading] = useState(true)
-    const [result, setResult] = useState<string | null>(null)
     const [isVoting, setIsVoting] = useState(false)
     const [voteResult, setVoteResult] = useState<{ option: string; percentage: number; rank: number } | null>(null)
     useEffect(() => {
         fetchResult().then((data) => {
-        setResult(data)
+        // setResult(data)
         setIsLoading(false)
         confetti({
             particleCount: 100,
@@ -105,11 +103,9 @@ export default function ResultPage() {
         })
     }, [])
     
-    // Input keypair data into signUp first param 
-    // singUp (keypair.pubKey, GatewayContract, VoiceCreditProxy)
     const handleVote = () => {
       setIsVoting(true)
-      submitVote(result!).then((data) => {
+      submitVote(result! as string).then((data) => {
       setVoteResult(data)
       setIsVoting(false)
       confetti({
@@ -119,6 +115,7 @@ export default function ResultPage() {
       })
       })
   }
+      
 
     return (
         <div className="flex items-center justify-center p-4 mt-8">

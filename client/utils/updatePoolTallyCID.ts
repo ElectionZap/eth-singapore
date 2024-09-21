@@ -1,5 +1,9 @@
 import { walletClient } from './client'
+<<<<<<< HEAD
 import { MACIWrapper } from '../contracts/MACIWrapper';
+=======
+import { MACIWrapper } from './contracts';
+>>>>>>> main
 
 export const updatePollTallyCID = async (
     pollId: bigint,

@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,35 +10,21 @@ import { Lock } from "lucide-react"
 import { useRouter } from "next/router"
 import { useWallet } from "@/contexts/Wallet"
 import Link from "next/link"
+import { fetchPollByID } from "@/database/dbApi"
 
+// Interface for dynamic poll data
 interface Option {
   id: number
-  name: string
-  percentage: number
+  option: string
 }
 
-interface ElectionData {
-  id: number
+interface PollData {
+  poll_id: number
   title: string
-  image: string
   description: string
-  options: Option[]
-  deadline: string
-}
-
-const electionData: ElectionData = {
-  id: 1,
-  title: "2024 Presidential Election",
-  image: "/placeholder.jpg",
-  description: "The upcoming 2024 Presidential Election is a pivotal moment for our nation. Voters will choose the next leader of our country, who will guide us through critical domestic and international challenges. This election will shape policies on healthcare, economy, climate change, and foreign relations for years to come.",
-  options: [
-    { id: 1, name: "John Smith (Party A)", percentage: 35 },
-    { id: 2, name: "Sarah Johnson (Party B)", percentage: 32 },
-    { id: 3, name: "Michael Lee (Party C)", percentage: 18 },
-    { id: 4, name: "Emily Brown (Independent)", percentage: 10 },
-    { id: 5, name: "Other Candidates", percentage: 5 },
-  ],
-  deadline: "November 3, 2024"
+  image: string
+  voting_options: Option[]
+  end_date: string
 }
 
 function GhostProgressBar() {
@@ -52,10 +38,47 @@ function GhostProgressBar() {
 }
 
 export default function ElectionDetails() {
-  const router = useRouter();
-    const { id } = router.query;
+  const router = useRouter()
+  const { id } = router.query // Dynamic poll ID from URL
+  const { signer } = useWallet()
+  
+  // State for poll data
+  const [pollData, setPollData] = useState<PollData | null>(null)
+  const [loading, setLoading] = useState(true)
 
-    const { signer } = useWallet();
+  // Fetch poll data on component mount when ID is available
+  useEffect(() => {
+    if (id) {
+      const loadPollData = async () => {
+        setLoading(true)
+        try {
+          const data = await fetchPollByID(id as string)
+
+          // Parse the voting_options field since it is returned as a string
+          const parsedVotingOptions = JSON.parse(data.voting_options)
+
+          // Set the poll data, including the parsed voting options
+          setPollData({
+            ...data,
+            voting_options: parsedVotingOptions
+          })
+        } catch (error) {
+          console.error("Error fetching poll data:", error)
+        } finally {
+          setLoading(false)
+        }
+      }
+      loadPollData()
+    }
+  }, [id])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (!pollData) {
+    return <div>No poll data found</div>
+  }
 
   return (
     <div className="container mx-auto max-w-6xl px-4 pt-12 pb-24">
@@ -64,27 +87,30 @@ export default function ElectionDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Poll Image */}
         <Image
-          src={electionData.image}
-          alt={electionData.title}
+          src={pollData.image || "/placeholder.jpg"} 
+          alt={pollData.title}
           width={800}
           height={300}
           className="w-full h-48 object-cover rounded-lg shadow-md mb-8"
         />
         <div className="grid md:grid-cols-2 gap-8">
+          {/* Poll Details */}
           <Card className="h-full flex flex-col">
             <CardHeader>
               <CardTitle>
-                <p className="text-3xl font-bold mb-2">
-                  {electionData.title}
-                </p>
+                <p className="text-3xl font-bold mb-2">{pollData.title}</p>
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col justify-between">
               <div>
-                <p className="text-gray-600 mb-4">{electionData.description}</p>
+                <p className="text-gray-600 mb-4">{pollData.description}</p>
                 <p className="text-sm text-gray-500 mb-6">
-                  Deadline to vote: <span className="font-semibold">{electionData.deadline}</span>
+                  Deadline to vote:{" "}
+                  <span className="font-semibold">
+                    {new Date(pollData.end_date).toLocaleDateString()}
+                  </span>
                 </p>
               </div>
               {signer ? (
@@ -100,13 +126,15 @@ export default function ElectionDetails() {
               )}
             </CardContent>
           </Card>
+
+          {/* Poll Voting Options */}
           <Card className="h-full">
             <CardHeader>
               <CardTitle>Current Standings</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {electionData.options.map((option) => (
+                {pollData.voting_options.map((option) => (
                   <motion.div
                     key={option.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -114,13 +142,13 @@ export default function ElectionDetails() {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">{option.name}</span>
+                      <span className="font-medium">{option.option}</span>
                       <span className="text-sm font-semibold">
-                        {signer ? `${option.percentage}%` : '--'}
+                        {signer ? "--%" : "--"}
                       </span>
                     </div>
                     {signer ? (
-                      <Progress value={option.percentage} className="h-2" />
+                      <Progress value={0} className="h-2" /> // Replace `0` with actual percentage when available
                     ) : (
                       <GhostProgressBar />
                     )}
