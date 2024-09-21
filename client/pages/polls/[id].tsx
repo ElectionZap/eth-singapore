@@ -22,6 +22,7 @@ interface PollData {
   poll_id: number
   title: string
   description: string
+  image: string
   voting_options: Option[]
   end_date: string
 }
@@ -88,7 +89,7 @@ export default function ElectionDetails() {
       >
         {/* Poll Image */}
         <Image
-          src="/placeholder.jpg"
+          src={pollData.image || "/placeholder.jpg"} 
           alt={pollData.title}
           width={800}
           height={300}
