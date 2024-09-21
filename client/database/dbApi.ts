@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const BACKEND_URL = process.env.BACKEND_URL as string;
+const BACKEND_URL = process.env.BACKEND_URL as string || "https://backend-production-e668.up.railway.app";
 
 export const fetchAllPolls = async () => {
   const response = await fetch(`${BACKEND_URL}/api/polls`);
