@@ -16,12 +16,10 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { createDbPoll } from "@/database/dbApi"; // Ensure this is correctly imported
-import createPoll from "@/utils/createPoll"
-import { fetchPoll } from "@/utils/fetchPoll"
-import { publicClient } from "@/utils/client"
-// import { getPollCreationEvent } from "@/utils/getPollCreationEvent"
-import { MACIWrapper } from "@/contracts/MACIWrapper"
-import { hexToNumber } from "viem"
+import createPoll from "@/utils/createPoll";
+import { fetchPoll } from "@/utils/fetchPoll";
+import { publicClient } from "@/utils/client";
+import { hexToNumber } from "viem";
 import { pinFileWithPinata } from "@/utils/pinata";
 
 const PINATA_GATEWAY = process.env.NEXT_PUBLIC_PINATA_GATEWAY;
@@ -39,6 +37,7 @@ interface FormData {
 export default function CreateElectionPoll() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // Add state for image preview
   const { toast } = useToast();
   const {
     register,
@@ -76,9 +75,9 @@ export default function CreateElectionPoll() {
 
       const tx = await createPoll(
         data.title,
-        ['1','2'], // have no idea what this is
+        ['1', '2'], // have no idea what this is
         metadata,
-        BigInt(durationInSeconds), 
+        BigInt(durationInSeconds),
         data.isQuadraticVoting ? 1 : 0
       );
 
@@ -115,6 +114,7 @@ export default function CreateElectionPoll() {
         });
         setIsSubmitted(true);
         reset();
+        setImagePreview(null); // Reset the image preview
       } else {
         console.log('Transaction failed or reverted.');
         toast({
@@ -142,6 +142,14 @@ export default function CreateElectionPoll() {
     reset({
       options: [{ value: "" }, { value: "" }],
     });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
   };
 
   return (
@@ -253,26 +261,34 @@ export default function CreateElectionPoll() {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-full mt-2 justify-start text-left font-normal",
+                            "w-full mt-2",
                             !watch("startDate") && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("startDate")
-                            ? format(watch("startDate"), "PPP")
-                            : "Pick a date"}
+                          {watch("startDate") ? (
+                            format(watch("startDate"), "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="p-0">
                         <Calendar
                           mode="single"
                           selected={watch("startDate")}
-                          onSelect={(date) => setValue("startDate", date as Date)}
+                          onSelect={(date) => setValue("startDate", date!)}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
+                    {errors.startDate && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.startDate.message}
+                      </p>
+                    )}
                   </div>
+
                   <div>
                     <Label>End Date</Label>
                     <Popover>
@@ -280,45 +296,59 @@ export default function CreateElectionPoll() {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-full mt-2 justify-start text-left font-normal",
+                            "w-full mt-2",
                             !watch("endDate") && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("endDate")
-                            ? format(watch("endDate"), "PPP")
-                            : "Pick a date"}
+                          {watch("endDate") ? (
+                            format(watch("endDate"), "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="p-0">
                         <Calendar
                           mode="single"
                           selected={watch("endDate")}
-                          onSelect={(date) => setValue("endDate", date as Date)}
+                          onSelect={(date) => setValue("endDate", date!)}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
+                    {errors.endDate && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.endDate.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="image">Upload Image</Label>
+                  <Label htmlFor="image">Poll Image</Label>
                   <Input
-                    className="mt-2"
-                    id="image"
                     type="file"
-                    accept="image/*"
+                    id="image"
+                    className="mt-2"
                     {...register("image")}
+                    onChange={handleImageChange} // Call handleImageChange when an image is selected
                   />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <Label>Image Preview:</Label>
+                      <img
+                        src={imagePreview}
+                        alt="Selected"
+                        className="mt-2 w-full h-auto rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} className="w-full">
                   {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Poll...
-                    </>
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
                     "Create Poll"
                   )}
@@ -330,17 +360,13 @@ export default function CreateElectionPoll() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="text-center"
               >
-                <p className="text-center text-lg">
-                  Your poll has been successfully created!
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <Button onClick={handleCreateOther}>Create Other</Button>
-                  <Link href="/polls">
-                    <Button variant="outline">See other polls</Button>
-                  </Link>
-                </div>
+                <h2 className="text-2xl font-bold">Poll Created!</h2>
+                <p className="mt-2">Your election poll has been successfully created.</p>
+                <Button className="mt-6" onClick={handleCreateOther}>
+                  Create Another Poll
+                </Button>
               </motion.div>
             )}
           </AnimatePresence>
