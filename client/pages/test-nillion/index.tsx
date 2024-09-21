@@ -16,26 +16,72 @@ interface Quiz {
     }[];
 }
 
-export default function TestNillionPage(pollId: string) {
+export default function TestNillionPage() {
     const [quiz, setQuiz] = React.useState<Quiz | null>(null);
+    const [storeId, setStoreId] = React.useState<string | null>(null);
+    const [weights, setWeights] = React.useState<any[]>([]);
+
+    // Fetch the quiz when the component mounts
     React.useEffect(() => {
         const fetchQuiz = async () => {
-            const quiz = await getQuizFromPoll(pollId);
-            setQuiz(quiz);
+            try {
+                const quiz = await getQuizFromPoll(1); // Fetch the quiz
+                console.log('Quiz:', quiz);
+                setQuiz(quiz);
+
+                // Set initial weights based on the fetched quiz data
+                const initialWeights = quiz.support_questions.map((question) => ({
+                    option0_weights: question.weights.option_0_weights,
+                    option1_weights: question.weights.option_1_weights,
+                }));
+                setWeights(initialWeights);
+            } catch (error) {
+                console.error('Error fetching quiz:', error);
+            }
         };
         fetchQuiz();
-    }, []);
+    }, []); // Empty dependency array means this runs once when the component mounts
 
-    const initialWeights = React.useMemo(() => {
-        if (!quiz) return [];
-        return quiz.support_questions.map((question) => ({
-            option0_weights: new Array(question.options.length).fill(0),
-            option1_weights: new Array(question.options.length).fill(0),
-        }));
-    }, [quiz]);
+    // Watch for weight changes and trigger storeValues when weights are updated
+    React.useEffect(() => {
+        if (weights.length > 0) {
+            storeValues();
+        }
+    }, [weights]); // Run storeValues only when weights change
 
-    const [storeId, setStoreId] = React.useState<string | null>(null);
-    const [weights, setWeights] = React.useState(initialWeights);
+    // Function to store the quiz weights
+    const storeValues = async () => {
+        try {
+            const transformedWeights: Record<string, number> = {};
+
+            console.log('weights:', weights);
+
+            // Dynamically generate keys and values for each question and its options
+            weights.forEach((weight, qIndex) => {
+                weight.option0_weights.forEach((val: number, wIndex: number) => {
+                    transformedWeights[`q${qIndex + 1}_option0_weight_${wIndex + 1}`] = val;
+                });
+                weight.option1_weights.forEach((val: number, wIndex: number) => {
+                    transformedWeights[`q${qIndex + 1}_option1_weight_${wIndex + 1}`] = val;
+                });
+            });
+
+            // Send the transformed weights to the backend
+            const response = await axios.post('/api/store_values', transformedWeights, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            // Update store ID
+            await addNillionIdToPoll(1, response.data.store_id); // This should be the Nillion ID update
+            setStoreId(response.data.store_id); // Store the ID
+            console.log('Stored values response:', response.data);
+        } catch (error) {
+            console.error('Error storing values:', error);
+        }
+    };
+
 
     const [answers, setAnswers] = React.useState({
         q1_answer: 1,
@@ -57,36 +103,6 @@ export default function TestNillionPage(pollId: string) {
           ...answers,
           [e.target.name]: Number(e.target.value)
         });
-    };
-    
-    const storeValues = async () => {
-        try {
-          const transformedWeights: Record<string, number> = {};
-    
-          // Dynamically generate keys and values for each question and its options
-          weights.forEach((weight, qIndex) => {
-            weight.option0_weights.forEach((val, wIndex) => {
-              transformedWeights[`q${qIndex + 1}_option0_weight_${wIndex + 1}`] = val;
-            });
-            weight.option1_weights.forEach((val, wIndex) => {
-              transformedWeights[`q${qIndex + 1}_option1_weight_${wIndex + 1}`] = val;
-            });
-          });
-    
-          // Send the transformed weights to the backend
-          const response = await axios.post('/api/store_values', transformedWeights, {
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          // no fail check here because sugou
-          addNillionIdToPoll(pollId, response.data.store_id); //this should be it
-          setStoreId(response.data.store_id);
-          console.log('Stored values response:', response.data);
-        } catch (error) {
-          console.error('Error storing values:', error);
-        }
     };
     
     const computeValues = async () => {

@@ -14,7 +14,7 @@ const fetchResult = () => {
   return new Promise<string>((resolve) => {
     setTimeout(() => {
       resolve("Candidate A")
-    }, 3000) // 3 seconds delay
+    }, 100) // delay
   })
 }
 
@@ -22,7 +22,7 @@ const submitVote = () => {
   return new Promise<{ option: string; percentage: number; rank: number }>((resolve) => {
     setTimeout(() => {
       resolve({ option: "Option 2", percentage: 32, rank: 2 })
-    }, 2000) // 2 seconds delay
+    }, 100) // delay
   })
 }
 
