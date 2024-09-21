@@ -8,7 +8,10 @@ import { Loader2 } from "lucide-react"
 import confetti from 'canvas-confetti'
 import Link from "next/link"
 import { useRouter } from "next/router"
+import { signUp } from '@/utils/signUp'
 
+const FreeForAllGatekeeper = '0x4C7a83ccD9177d3A2C800D614461e48B3aA4C471'
+const ConstantInitialVoiceCreditProxy = '0x41293862e60d17623fc760C3FD97bC36293Ad7ED'
 // Mock API calls
 const fetchResult = () => {
   return new Promise<string>((resolve) => {
@@ -71,7 +74,8 @@ export default function ResultPage() {
         })
     }, [])
 
-    const handleVote = () => {
+    const handleVote = async () => {
+      // const sign = await signUp({x:BigInt(1), y: BigInt(2)}, FreeForAllGatekeeper, ConstantInitialVoiceCreditProxy)
         setIsVoting(true)
         submitVote().then((data) => {
         setVoteResult(data)

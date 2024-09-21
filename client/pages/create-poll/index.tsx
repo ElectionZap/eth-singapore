@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useForm, useFieldArray } from "react-hook-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,12 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import createPoll from "@/utils/createPoll"
+import { fetchPoll } from "@/utils/fetchPoll"
+import { publicClient } from "@/utils/client"
+// import { getPollCreationEvent } from "@/utils/getPollCreationEvent"
+import { MACIWrapper } from "@/contracts/MACIWrapper"
+import { hexToNumber } from "viem"
 
 interface FormData {
   name: string
@@ -45,12 +51,48 @@ export default function CreateElectionPoll() {
     await new Promise(resolve => setTimeout(resolve, 2000))
     setIsSubmitting(false)
     console.log(data)
-    toast({
-      title: "Poll Created!",
-      description: "Your election poll has been successfully created.",
-      duration: 5000,
+  //   useEffect(() => {
+  //     if (typeof window !== "undefined") {
+  //       createPoll('American Election', ['D', 'K'], '', 3600, 1);
+  //     }
+  // }, []);
+    // const tx = await createPoll(data.name, data.options, `1`, BigInt(3600), 1);
+    const tx = await createPoll(data.name, [`1`, `2`], `1`, BigInt(3600), 1);
+    try {
+        const transactionReceipt = await publicClient.waitForTransactionReceipt({ hash: tx });
+
+        console.log(transactionReceipt);
+
+        if (transactionReceipt && transactionReceipt.status == 'reverted') {
+          return 'Transaction failed';
+        }
+
+        if (transactionReceipt?.status === 'success') {
+          console.log(transactionReceipt);
+          const pollId = hexToNumber(transactionReceipt.logs[7].topics[1]!);
+          // Data returns
+          // id: pollId,
+          // name: _name,
+          // encodedOptions: encodedOptions,
+          // numOfOptions: _options.length,
+          // metadata: _metadata,
+          // startTime: block.timestamp,
+          // endTime: endTime,
+          // pollContracts: pollContracts,
+          // options: _options,
+          // tallyJsonCID: ""
+          const data = fetchPoll(BigInt(pollId));
+          console.log(data);
+          toast({
+            title: "Poll Created!",
+            description: "Your election poll has been successfully created.",
+            duration: 5000,
     })
     setIsSubmitted(true)
+  }
+} catch(error) {
+    console.log(error);
+}
     reset()
   }
 
