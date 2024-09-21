@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti'
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { signUp } from '@/utils/signUp'
+import { publicClient } from "@/utils/client"
 
 const FreeForAllGatekeeper = '0x4C7a83ccD9177d3A2C800D614461e48B3aA4C471'
 const ConstantInitialVoiceCreditProxy = '0x41293862e60d17623fc760C3FD97bC36293Ad7ED'
@@ -73,19 +74,35 @@ export default function ResultPage() {
         })
         })
     }, [])
-
+    
+    // Input keypair data into signUp first param 
+    // singUp (keypair.pubKey, GatewayContract, VoiceCreditProxy)
     const handleVote = async () => {
-      // const sign = await signUp({x:BigInt(1), y: BigInt(2)}, FreeForAllGatekeeper, ConstantInitialVoiceCreditProxy)
-        setIsVoting(true)
-        submitVote().then((data) => {
-        setVoteResult(data)
-        setIsVoting(false)
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-        })
-        })
+      const sign = await signUp({x:BigInt(1), y: BigInt(2)}, FreeForAllGatekeeper, ConstantInitialVoiceCreditProxy)
+        try {
+          const transactionReceipt = await publicClient.waitForTransactionReceipt({ hash: sign });
+
+          console.log(transactionReceipt);
+  
+          if (transactionReceipt && transactionReceipt.status == 'reverted') {
+            return 'Transaction failed';
+          }
+  
+          if (transactionReceipt?.status === 'success') {
+          setIsVoting(true)
+          submitVote().then((data) => {
+          setVoteResult(data)
+          setIsVoting(false)
+          confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 }
+          })
+          })
+        }
+      } catch(error) {
+        console.log(error)
+      }
     }
 
     return (
