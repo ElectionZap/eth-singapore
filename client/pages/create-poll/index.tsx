@@ -22,10 +22,14 @@ import { publicClient } from "@/utils/client"
 // import { getPollCreationEvent } from "@/utils/getPollCreationEvent"
 import { MACIWrapper } from "@/contracts/MACIWrapper"
 import { hexToNumber } from "viem"
+import { pinFileWithPinata } from "@/utils/pinata";
+
+const PINATA_GATEWAY = process.env.NEXT_PUBLIC_PINATA_GATEWAY;
 
 interface FormData {
   title: string;
   description: string;
+  image: FileList;
   isQuadraticVoting: boolean;
   startDate: Date;
   endDate: Date;
@@ -62,9 +66,13 @@ export default function CreateElectionPoll() {
         (data.endDate.getTime() - data.startDate.getTime()) / 1000
       );
 
+      const IpfsHash = data.image && data.image.length > 0 ? await pinFileWithPinata(data.image[0]) : "";
+      const imageUrl = `${PINATA_GATEWAY}/ipfs/${IpfsHash}`;
+      console.log("Image URL:", imageUrl);
+
       const votingOptions = data.options.map((option, index) => String(index + 1));
 
-      const metadata = "1";
+      const metadata = imageUrl;
 
       const tx = await createPoll(
         data.title,
@@ -85,6 +93,7 @@ export default function CreateElectionPoll() {
         await createDbPoll({
           title: data.title,
           description: data.description,
+          image: imageUrl,
           isQuadraticVoting: data.isQuadraticVoting,
           creator: "0x3", // Replace with actual creator wallet
           startDate: data.startDate.toISOString(),
@@ -293,7 +302,7 @@ export default function CreateElectionPoll() {
                   </div>
                 </div>
 
-                {/* <div>
+                <div>
                   <Label htmlFor="image">Upload Image</Label>
                   <Input
                     className="mt-2"
@@ -302,7 +311,7 @@ export default function CreateElectionPoll() {
                     accept="image/*"
                     {...register("image")}
                   />
-                </div> */}
+                </div>
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? (
