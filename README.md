@@ -63,7 +63,30 @@ Modern voting systems face significant challenges, including:
 - *TallyFactory*: 0x3782eF5d3ec8e7a0EcC05Ad74D20e724Ffa33381
 - *MACIWrapper*: 0x89eD382d4B94Db5dcf436b40795199708aC4f05d
 - *Vk Registry*: 0x086904d468Bb2A4e8C024AE1dbf6058d0936AE26
-
+## Linea Contracts
+deploying "ConstantInitialVoiceCreditProxy" deployed at 0x5B5AaDFf81c583D3D13B4a2909728FCd053B2962 
+The initial voice credit proxy is deployed at 0x5B5AaDFf81c583D3D13B4a2909728FCd053B2962
+deploying "FreeForAllGatekeeper" deployed at 0xd2a0bf5F6284d07bf8Be04ebf44D5317D0c5A826 
+The gatekeeper is deployed at 0xd2a0bf5F6284d07bf8Be04ebf44D5317D0c5A826
+deploying "Verifier" deployed at 0x5EA6078a4C987564eaB5685E3A1E6c07D70760Bd 
+The verifier is deployed at 0x5EA6078a4C987564eaB5685E3A1E6c07D70760Bd
+deploying "PoseidonT3" deployed at 0xa67dAe60C1FF27Bf122DffD6aD644301370B8f74 
+The poseidonT3 is deployed at 0xa67dAe60C1FF27Bf122DffD6aD644301370B8f74
+deploying "PoseidonT4" deployed at 0x0262AF6A158243E039e5dE8dcb374E6F8C331981 
+The poseidonT4 is deployed at 0x0262AF6A158243E039e5dE8dcb374E6F8C331981
+deploying "PoseidonT5" deployed at 0x569e75136126533947ea0d4e85b11ed1448d197E 
+The poseidonT5 is deployed at 0x569e75136126533947ea0d4e85b11ed1448d197E
+deploying "PoseidonT6" deployed at 0x5e6Ed8Eff4C9BEB262B41a7569cD8c63Ac076C8a 
+The poseidonT6 is deployed at 0x5e6Ed8Eff4C9BEB262B41a7569cD8c63Ac076C8a
+deploying "PollFactory" deployed at 0x55910fcce46b76343261d147812C665E46a33526
+The poll factory is deployed at 0x55910fcce46b76343261d147812C665E46a33526
+"MessageProcessorFactory" deployed at 0xC212C9511c34ca014F192Cfef6E91A823430384F with 2052082 gas
+The message processor factory is deployed at 0xC212C9511c34ca014F192Cfef6E91A823430384F
+"TallyFactory" deployed at 0x56e21ac9894f53b4B9B2063704c886D964e84c96
+The tally factory is deployed at 0x56e21ac9894f53b4B9B2063704c886D964e84c96
+"MACIWrapper" deployed at 0xac1ee4e757467F4c844D346630e7439DD931ceCc
+The MACI contract is deployed at 0xac1ee4e757467F4c844D346630e7439DD931ceCc
+The Vk Registry is deployed at 0x682e7674c698E1e5A54D4cc26e210D3c0ea3CF3d
 ## Source Code
 The code for PolyVOTE is open-source and available on GitHub:  
 [GitHub - ElectionZap/eth-singapore](https://github.com/ElectionZap/eth-singapore)
