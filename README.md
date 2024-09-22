@@ -1,7 +1,7 @@
 # PolyVOTE ☑️
 **PolyVOTE** is an end-to-end *private voting service* using *MPC, ZK, and AI* to recommend and process votes with complete privacy.
 
-**LiveVideoDemo:** [PolyVOTE Hackathon Demo](https://hackathon.project.io)  
+**LiveVideoDemo:** [PolyVOTE Hackathon Demo](https://drive.google.com/drive/folders/1lY2BSXo4kccAxM1E4wTAPYv7bmKIwLDJ?usp=sharing)  
 **GitHub Repository:** [GitHub - ElectionZap/eth-singapore](https://github.com/ElectionZap/eth-singapore)
 
 
@@ -17,6 +17,7 @@ Modern voting systems face significant challenges, including:
 - **Private Computation:** Use of MPC allows sensitive vote data to remain private during computation.
 - **AI Recommendations:** Voters can receive tailored recommendations based on their preferences.
 - **Anti-Collusion:** Secure anti-collusion mechanisms as a service for elections.
+- **DAO Governances:** New ways of governance (Great for public goods 👀).
 
 ## Our Solution
 **PolyVOTE** offers a fully private and secure voting service, combining MPC, ZK proofs, and AI-driven recommendations. Voters can cast their votes with confidence, knowing their privacy is protected, and election results remain transparent yet confidential.
@@ -48,6 +49,20 @@ Modern voting systems face significant challenges, including:
 - **Nillion for Blind Computation**
 - **ChatGPT for AI-Driven Recommendations**
 - **Linea Network**
+
+## Contracts Addresses
+- *ConstantInitialVoiceCreditProxy*: 0x41293862e60d17623fc760C3FD97bC36293Ad7ED
+- *FreeForAllGatekeeper*: 0x4C7a83ccD9177d3A2C800D614461e48B3aA4C471
+- *Verifier*: 0xCf4352ED8eC1981F2cB1e8B65C7Dfca7Bcc523ee
+- *PoseidonT3*: 0xaeB59c043D0b022d31Ae13c3689785Df88266434
+- *PoseidonT4*: 0x0B7186B2beCE8d0E41329Bda5Fc9b59e8257B5B4
+- *PoseidonT5*: 0xd4EF52AF22546ec7AcCFfA7290B39dc5eD32eec8
+- *PoseidonT6*: 0x20A391800577D0756A62CE61612eEB499a482f86
+- *PollFactory*: 0x0ABDfAb945C1b1c0649b7808E8c657dE5cC19666
+- *MessageProcessorFactory*: 0x4333299ad4654794C4001Fd2a027969EB8f1c165
+- *TallyFactory*: 0x3782eF5d3ec8e7a0EcC05Ad74D20e724Ffa33381
+- *MACIWrapper*: 0x89eD382d4B94Db5dcf436b40795199708aC4f05d
+- *Vk Registry*: 0x086904d468Bb2A4e8C024AE1dbf6058d0936AE26
 
 ## Source Code
 The code for PolyVOTE is open-source and available on GitHub:  
