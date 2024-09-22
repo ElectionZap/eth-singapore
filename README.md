@@ -54,8 +54,9 @@ The code for PolyVOTE is open-source and available on GitHub:
 [GitHub - ElectionZap/eth-singapore](https://github.com/ElectionZap/eth-singapore)
 
 ## Screenshots
-![Screenshot 1](./client/public/screenshot1.png)
-![Screenshot 2](./client/public/screenshot2.png)
-![Screenshot 3](./client/public/screenshot3.png)
-![Screenshot 4](./client/public/screenshot4.png)
+![Screenshot 2024-09-22 081920](https://github.com/user-attachments/assets/ec0d6b31-da95-4a23-a1e5-3f75b6a9b69c)
+![Screenshot 2024-09-22 082953](https://github.com/user-attachments/assets/446d6acc-5ce9-492f-a12b-5c154fdd0fe8)
+![Screenshot 2024-09-22 082327](https://github.com/user-attachments/assets/552a6110-b10a-4d0a-846f-177ee890792a)
+![Screenshot 2024-09-22 082156](https://github.com/user-attachments/assets/552a1cc8-c7a4-4703-9444-273c4ee70e63)
+![Screenshot 2024-09-22 081631](https://github.com/user-attachments/assets/0b5307ed-1609-4ab3-ad06-049261666da1)
 
