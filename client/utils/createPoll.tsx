@@ -25,7 +25,7 @@ export default async function createPoll(
     const [account] = await walletClient.getAddresses();
     
     const tx = await walletClient.writeContract({
-        address: '0x89eD382d4B94Db5dcf436b40795199708aC4f05d', 
+        address: '0xac1ee4e757467F4c844D346630e7439DD931ceCc', 
         abi: MACIWrapper,
         functionName: 'createPoll',
         args: [name, options, metadata, duration, isQv],  

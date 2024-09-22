@@ -1,13 +1,13 @@
 import { createPublicClient, createWalletClient, custom, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { sepolia } from 'viem/chains'
+import { lineaSepolia, sepolia } from 'viem/chains'
  
 export const publicClient = createPublicClient({
-  chain: sepolia,
+  chain: lineaSepolia,
   transport: http()
 })
 
 export const walletClient = createWalletClient({
-    chain: sepolia,
+    chain: lineaSepolia,
     transport: custom(window.ethereum!)
   })

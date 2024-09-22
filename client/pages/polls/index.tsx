@@ -30,7 +30,7 @@ export default function PollsComponent() {
         // Transform the poll data to match the Poll interface
         const formattedPolls: Poll[] = pollData.map((poll: any) => ({
           id: poll.poll_id, // map poll_id to id
-          image: poll.image || "/placeholder.jpg", // placeholder image for now
+          image: "/placeholder.jpg", // placeholder image for now
           title: poll.title, // title remains the same
           author: poll.creator, // creator (might be an address)
           options: JSON.parse(poll.voting_options).map((option: any) => ({

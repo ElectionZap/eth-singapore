@@ -3,7 +3,7 @@ import { MACIWrapper } from '../contracts/MACIWrapper';
 
 export const fetchPoll = async (address: `0x${string}`) => {
     const data = await publicClient.readContract({
-        address: '0x89eD382d4B94Db5dcf436b40795199708aC4f05d',
+        address: '0xac1ee4e757467F4c844D346630e7439DD931ceCc',
         abi: MACIWrapper,
         functionName: 'getPollId',
         args: [address],

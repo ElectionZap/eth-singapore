@@ -1,9 +1,7 @@
 import { walletClient } from './client'
-<<<<<<< HEAD
 import { MACIWrapper } from '../contracts/MACIWrapper';
-=======
-import { MACIWrapper } from './contracts';
->>>>>>> main
+
+
 
 export const updatePollTallyCID = async (
     pollId: bigint,
@@ -11,7 +9,7 @@ export const updatePollTallyCID = async (
 ) => {
     const [account] = await walletClient.getAddresses()
     await walletClient.writeContract({
-        address: '0x89eD382d4B94Db5dcf436b40795199708aC4f05d',
+        address: '0xac1ee4e757467F4c844D346630e7439DD931ceCc',
         abi: MACIWrapper,
         functionName: 'updatePollTallyCID',
         args: [pollId, tallyJsonCID],

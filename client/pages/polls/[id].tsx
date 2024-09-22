@@ -89,7 +89,7 @@ export default function ElectionDetails() {
       >
         {/* Poll Image */}
         <Image
-          src={pollData.image || "/placeholder.jpg"} 
+          src={"/placeholder.jpg"} 
           alt={pollData.title}
           width={800}
           height={300}

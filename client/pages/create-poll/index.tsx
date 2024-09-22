@@ -64,7 +64,7 @@ export default function CreateElectionPoll() {
 
     try {
       const durationInSeconds = Math.floor(
-        (data.endDate.getTime() - data.startDate.getTime()) / 1000
+        (data.endDate.getTime() - data.startDate.getTime()) / 100000
       );
 
       const IpfsHash = data.image && data.image.length > 0 ? await pinFileWithPinata(data.image[0]) : "";

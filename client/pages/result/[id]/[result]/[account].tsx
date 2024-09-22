@@ -39,7 +39,7 @@ const submitVote = async (result: string) => {
         }
 
         if (signReceipt?.status === 'success') {
-        const pollId = 7;
+        const pollId = 1;
         const data = await fetchPoll(BigInt(pollId))
         console.log(data.pollContracts.poll)
         const msg = await publishMessage([BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(1), BigInt(0)], {x:BigInt(userKP!.pubKey.asContractParam().x), y:BigInt(userKP!.pubKey.asContractParam().y)}, data.pollContracts.poll)
